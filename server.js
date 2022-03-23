@@ -9,6 +9,7 @@ const helmet = require("helmet");
 const apiRoutes = require("./routes/api.js");
 const fccTestingRoutes = require("./routes/fcctesting.js");
 const runner = require("./test-runner");
+const { errorHandler } = require("./utils/middleware");
 
 let app = express();
 
@@ -46,6 +47,9 @@ fccTestingRoutes(app);
 
 //Routing for API
 apiRoutes(app);
+
+app.use(errorHandler);
+
 //404 Not Found Middleware
 app.use(function (req, res, next) {
 	res.status(404).type("text").send("Not Found");

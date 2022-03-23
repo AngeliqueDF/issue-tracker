@@ -13,4 +13,10 @@ module.exports = {
 		}
 		next();
 	},
+	errorHandler: (err, req, res, next) => {
+		if (err.name === "ValidationError") {
+			// freeCodeCamp tests do not pass if status codes are defined
+			res.json({ error: "required field(s) missing" });
+		}
+	},
 };
