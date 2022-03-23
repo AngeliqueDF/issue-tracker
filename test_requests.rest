@@ -1,0 +1,52 @@
+GET http://localhost:3000
+
+### with all fields
+POST http://localhost:3000/api/issues/test
+Content-Type: application/json
+
+{
+  "issue_title": "REST CLIENT Fix error in posting data",
+  "issue_text": "When we post data it has an error.",
+  "created_by": "Joe",
+  "assigned_to": "Joe",
+  "status_text": "In QA"
+}
+
+### with character to escape and required fields only
+POST http://localhost:3000/api/issues/test
+Content-Type: application/json
+
+{
+  "issue_title": "<script>alert(‘XSS’)</script>",
+  "issue_text": "When we post data it has an error.",
+  "created_by": "Joe"
+}
+
+### with required fields only
+POST http://localhost:3000/api/issues/test
+Content-Type: application/json
+
+{
+  "issue_title": "REST CLIENT Fix error in posting data",
+  "issue_text": "When we post data it has an error.",
+  "created_by": "Joe"
+}
+
+### with all except "open"
+POST http://localhost:3000/api/issues/test
+Content-Type: application/json
+
+{
+  "issue_title": "REST CLIENT Fix error in posting data",
+  "issue_text": "When we post data it has an error.",
+  "created_by": "Joe",
+  "assigned_to": "Joe",
+  "status_text": "In QA"
+}
+
+### missing required fields
+POST http://localhost:3000/api/issues/test
+Content-Type: application/json
+
+{
+}
