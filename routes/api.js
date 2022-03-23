@@ -1,4 +1,5 @@
 'use strict';
+const { sanitizeInput } = require("./../utils/middleware");
 
 module.exports = function (app) {
 
