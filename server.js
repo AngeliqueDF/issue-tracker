@@ -12,6 +12,7 @@ const runner = require("./test-runner");
 
 let app = express();
 
+const mongoose = require("mongoose");
 app.use(helmet());
 
 app.use("/public", express.static(process.cwd() + "/public"));
@@ -20,6 +21,15 @@ app.use(cors({ origin: "*" })); //For FCC testing purposes only
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+
+mongoose
+	.connect(process.env.MONGODB_URI)
+	.then(() => {
+		console.log("\x1b[32m%s\x1b[0m", "connected to MongoDB");
+	})
+	.catch((error) => {
+		console.log("\x1b[31m%s\x1b[0m", error.message);
+	});
 
 //Sample front-end
 app.route("/:project/").get(function (req, res) {
