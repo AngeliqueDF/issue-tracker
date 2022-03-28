@@ -8,20 +8,22 @@ chai.use(chaiHttp);
 const helper = require("./../utils/helper");
 const Issue = require("./../models/issue");
 
-suite("Functional Tests", function () {
-	suite("POST requests to /api/issues/{project}", () => {
-		const API_POST_URL = "/api/issues/project";
-		const allFieldsRequest = {
-			issue_title: "A request with all fields",
-			issue_text: "When we post data it has an error.",
-			created_by: "Joe",
-			assigned_to: "Joe",
-			status_text: "In QA",
-		};
+const API_URL = "/api/issues";
 
-		test("Create an issue when all fields are provided", (done) => {
+suite("Functional Tests", function () {
+	const POST_PROJECT = "post_requests";
+	const POST_TESTS_URL = API_URL + "/" + POST_PROJECT;
+	const ALL_FIELDS_POST_REQUEST = {
+		issue_title: "A request with all fields",
+		issue_text: "When we post data it has an error.",
+		created_by: "Joe",
+		assigned_to: "Joe",
+		status_text: "In QA",
+	};
+	suite("POST requests to /api/issues/{project}", function () {
+		test("Create an issue when all fields are provided", function (done) {
 			// Doesn't include date properties "created_on" and "updated_on"
-			const allFieldsExpectedResponse = {
+			const ALL_FIELDS_EXPECTED_RESPONSE = {
 				issue_title: "A request with all fields",
 				issue_text: "When we post data it has an error.",
 				created_by: "Joe",
@@ -31,8 +33,8 @@ suite("Functional Tests", function () {
 			};
 			chai
 				.request(server)
-				.post(API_POST_URL)
-				.send(allFieldsRequest)
+				.post(POST_TESTS_URL)
+				.send(ALL_FIELDS_POST_REQUEST)
 				.end((err, res) => {
 					assert.equal(res.status, 200);
 					assert.equal(res.type, "application/json");
@@ -41,11 +43,11 @@ suite("Functional Tests", function () {
 
 					assert.equal(
 						res.body.issue_title,
-						allFieldsExpectedResponse.issue_title
+						ALL_FIELDS_EXPECTED_RESPONSE.issue_title
 					);
 					assert.equal(
 						res.body.issue_text,
-						allFieldsExpectedResponse.issue_text
+						ALL_FIELDS_EXPECTED_RESPONSE.issue_text
 					);
 
 					assert.property(res.body, "created_on");
@@ -55,29 +57,29 @@ suite("Functional Tests", function () {
 
 					assert.equal(
 						res.body.created_by,
-						allFieldsExpectedResponse.created_by
+						ALL_FIELDS_EXPECTED_RESPONSE.created_by
 					);
 
-					assert.equal(res.body.open, allFieldsExpectedResponse.open);
+					assert.equal(res.body.open, ALL_FIELDS_EXPECTED_RESPONSE.open);
 
 					assert.equal(
 						res.body.assigned_to,
-						allFieldsExpectedResponse.assigned_to
+						ALL_FIELDS_EXPECTED_RESPONSE.assigned_to
 					);
 
 					assert.equal(
 						res.body.status_text,
-						allFieldsExpectedResponse.status_text
+						ALL_FIELDS_EXPECTED_RESPONSE.status_text
 					);
 				});
 			done();
 		});
 
-		test("Return true for the 'open' property by default", (done) => {
+		test("Return true for the 'open' property by default", function (done) {
 			chai
 				.request(server)
-				.post(API_POST_URL)
-				.send(allFieldsRequest)
+				.post(POST_TESTS_URL)
+				.send(ALL_FIELDS_POST_REQUEST)
 				.end((err, res) => {
 					assert.isBoolean(res.body.open);
 					assert.isTrue(res.body.open);
@@ -85,10 +87,10 @@ suite("Functional Tests", function () {
 			done();
 		});
 
-		test("Return an error object when a required field is missing", (done) => {
+		test("Return an error object when a required field is missing", function (done) {
 			chai
 				.request(server)
-				.post(API_POST_URL)
+				.post(POST_TESTS_URL)
 				.send({})
 				.end((err, res) => {
 					// freeCodeCamp tests do not pass if status codes are defined
@@ -101,7 +103,7 @@ suite("Functional Tests", function () {
 			done();
 		});
 
-		test("Excluded optional fields return an empty string.", (done) => {
+		test("Excluded optional fields return an empty string.", function (done) {
 			const requiredOnly = {
 				issue_title: "Fix error in posting data",
 				issue_text: "When we post data it has an error.",
@@ -117,7 +119,7 @@ suite("Functional Tests", function () {
 			};
 			chai
 				.request(server)
-				.post(API_POST_URL)
+				.post(POST_TESTS_URL)
 				.send(requiredOnly)
 				.end((err, res) => {
 					assert.equal(res.body.assigned_to, requiredOnlyResponse.assigned_to);
