@@ -6,8 +6,15 @@ module.exports = function (app) {
 	app
 		.route("/api/issues/:project")
 
-		.get(function (req, res) {
+		.get(sanitizeInput, async (req, res) => {
 			let project = req.params.project;
+			try {
+				const issues = await Issue.find({ project, ...req.query }).exec();
+				res.json(issues);
+			} catch (error) {
+				console.log(error);
+				next(error);
+			}
 		})
 
 		.post(sanitizeInput, async (req, res, next) => {
