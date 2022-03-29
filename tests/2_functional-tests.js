@@ -229,5 +229,39 @@ suite("Functional Tests", function () {
 					done();
 				});
 		});
+
+		test("Return an array of all issues for the project specified in the URL", function (done) {
+			// Adding an issue for a different project, 'different_project', than the others which belong to the 'get_requests' project.
+			chai
+				.request(server)
+				.post(API_URL + "/different_project")
+				.send({
+					issue_title: "Issue for a different project",
+					issue_text: "Text of issue belonging to a different project",
+					created_by: "Different project issue author",
+				})
+				.end(function (err, res) {
+					// console.log("Test issue added for different_project", res.body);
+
+					// Requesting all issues for 'different_project'
+					chai
+						.request(server)
+						.get(API_URL + "/different_project")
+						.set("Content-Type", "application/json")
+						.end(function (err, res) {
+							assert.lengthOf(res.body, 1);
+							assert.include(res.body[0], {
+								issue_title: "Issue for a different project",
+							});
+							assert.include(res.body[0], {
+								issue_text: "Text of issue belonging to a different project",
+							});
+							assert.include(res.body[0], {
+								created_by: "Different project issue author",
+							});
+							done();
+						});
+				});
+		});
 	});
 });
