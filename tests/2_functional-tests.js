@@ -263,5 +263,22 @@ suite("Functional Tests", function () {
 						});
 				});
 		});
+
+		test("Allow filtering the request by passing a field and value as a URL query", function (done) {
+			const URL_QUERY = {
+				open: false,
+			};
+			chai
+				.request(server)
+				.get(GET_TESTS_URL)
+				.query(URL_QUERY)
+				.end(function (err, res) {
+					assert.include(res.body[0], {
+						...ISSUE_THREE,
+						open: JSON.parse(ISSUE_THREE.open),
+					});
+					done();
+				});
+		});
 	});
 });
