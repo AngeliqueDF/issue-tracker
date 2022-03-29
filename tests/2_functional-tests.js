@@ -129,4 +129,105 @@ suite("Functional Tests", function () {
 			done();
 		});
 	});
+
+	suite("GET requests to /api/issues/{project}", function () {
+		const GET_PROJECT_ONE = "get_requests";
+		const GET_PROJECT_TWO = "get_requests";
+		const GET_TESTS_URL = API_URL + "/" + GET_PROJECT_ONE;
+
+		const ISSUE_ONE = {
+			issue_title: "Issue 1 title",
+			issue_text: "Issue 1 text",
+			created_by: "author 1",
+		};
+		const ISSUE_TWO = {
+			issue_title: "Issue 2 title",
+			issue_text: "Issue 2 text",
+			created_by: "author 2",
+			assigned_to: "User 1",
+			status_text: "status text",
+		};
+		const ISSUE_THREE = {
+			issue_title: "Issue 3 title",
+			issue_text: "Issue 3 text",
+			created_by: "author 3",
+			assigned_to: "User 1",
+			status_text: "status text",
+			open: "false",
+		};
+
+		beforeEach(function () {
+			[ISSUE_ONE, ISSUE_TWO, ISSUE_THREE].forEach(async (issue) => {
+				chai
+					.request(server)
+					.post(GET_TESTS_URL)
+					.set("Content-Type", "application/json")
+					.send(issue)
+					.end(function (err, res) {
+						// console.log(res.status);
+						// console.log("request body:", res.body);
+						// console.log("error:", err);
+					});
+			});
+		});
+
+		afterEach(async function () {
+			await Issue.deleteMany({});
+		});
+
+		test("Return all fields for each issue returned", function (done) {
+			chai
+				.request(server)
+				.get(GET_TESTS_URL)
+				.set("Content-Type", "application/json")
+				.end(function (err, res) {
+					// Finding ISSUE_THREE
+					const returnedIssueThree = res.body.find(
+						(i) => i.issue_title === ISSUE_THREE.issue_title
+					);
+
+					// Checking all the keys are present in the issue
+					assert.hasAllKeys(returnedIssueThree, [
+						...Object.keys(ISSUE_THREE),
+						"created_on",
+						"updated_on",
+						"_id",
+					]);
+
+					// Checking all the values provided in the request match in the reponse
+					assert.propertyVal(
+						returnedIssueThree,
+						"issue_title",
+						ISSUE_THREE.issue_title
+					);
+
+					assert.propertyVal(
+						returnedIssueThree,
+						"issue_text",
+						ISSUE_THREE.issue_text
+					);
+					assert.propertyVal(
+						returnedIssueThree,
+						"created_by",
+						ISSUE_THREE.created_by
+					);
+					assert.propertyVal(
+						returnedIssueThree,
+						"assigned_to",
+						ISSUE_THREE.assigned_to
+					);
+					assert.propertyVal(
+						returnedIssueThree,
+						"status_text",
+						ISSUE_THREE.status_text
+					);
+					assert.propertyVal(
+						returnedIssueThree,
+						"open",
+						JSON.parse(ISSUE_THREE.open)
+					);
+					done();
+				});
+		});
+	});
 });
