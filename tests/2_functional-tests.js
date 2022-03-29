@@ -280,5 +280,23 @@ suite("Functional Tests", function () {
 					done();
 				});
 		});
+
+		test("Allow filtering the request by passing multiple fields and values as a URL query", function (done) {
+			const URL_QUERY = {
+				created_by: ISSUE_TWO.created_by,
+				open: "true",
+			};
+			chai
+				.request(server)
+				.get(GET_TESTS_URL)
+				.query(URL_QUERY)
+				.end(function (err, res) {
+					assert.include(res.body[0], {
+						...ISSUE_TWO,
+						open: JSON.parse(URL_QUERY.open),
+					});
+					done();
+				});
+		});
 	});
 });
