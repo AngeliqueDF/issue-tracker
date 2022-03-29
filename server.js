@@ -9,7 +9,7 @@ const helmet = require("helmet");
 const apiRoutes = require("./routes/api.js");
 const fccTestingRoutes = require("./routes/fcctesting.js");
 const runner = require("./test-runner");
-const { errorHandler } = require("./utils/middleware");
+const { errorHandler, sanitizeInput } = require("./utils/middleware");
 
 let app = express();
 
@@ -31,6 +31,8 @@ mongoose
 	.catch((error) => {
 		console.log("\x1b[31m%s\x1b[0m", error.message);
 	});
+
+app.use(sanitizeInput)
 
 //Sample front-end
 app.route("/:project/").get(function (req, res) {
