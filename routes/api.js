@@ -1,12 +1,11 @@
 "use strict";
 const Issue = require("./../models/issue");
-const { sanitizeInput } = require("./../utils/middleware");
 
 module.exports = function (app) {
 	app
 		.route("/api/issues/:project")
 
-		.get(sanitizeInput, async (req, res) => {
+		.get(async (req, res) => {
 			let project = req.params.project;
 			try {
 				const issues = await Issue.find({ project, ...req.query }).exec();
@@ -17,7 +16,7 @@ module.exports = function (app) {
 			}
 		})
 
-		.post(sanitizeInput, async (req, res, next) => {
+		.post(async (req, res, next) => {
 			let project = req.params.project;
 
 			const issue = new Issue({
