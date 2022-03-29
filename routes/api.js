@@ -13,9 +13,9 @@ module.exports = function (app) {
 		.post(sanitizeInput, async (req, res, next) => {
 			let project = req.params.project;
 
-
 			const issue = new Issue({
 				...req.body,
+				project,
 				assigned_to: req.body.assigned_to || "",
 				status_text: req.body.status_text || "",
 				created_on: new Date(),

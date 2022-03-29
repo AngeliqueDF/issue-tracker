@@ -1,6 +1,10 @@
 GET http://localhost:3000
 
-### with all fields
+### with a project name only
+GET http://localhost:3000/api/issues/test
+
+
+### with all fields and a project name
 POST http://localhost:3000/api/issues/test
 Content-Type: application/json
 
@@ -12,7 +16,7 @@ Content-Type: application/json
   "status_text": "In QA"
 }
 
-### with character to escape and required fields only
+### with a project name and, a character to escape and required fields only
 POST http://localhost:3000/api/issues/test
 Content-Type: application/json
 
@@ -22,7 +26,7 @@ Content-Type: application/json
   "created_by": "Joe"
 }
 
-### with required fields only
+### with a project name and required fields only
 POST http://localhost:3000/api/issues/test
 Content-Type: application/json
 
@@ -44,7 +48,7 @@ Content-Type: application/json
   "status_text": "In QA"
 }
 
-### missing required fields
+### a project name and missing required fields
 POST http://localhost:3000/api/issues/test
 Content-Type: application/json
 
