@@ -3,11 +3,11 @@ const mongoose = require("mongoose");
 const issueSchema = new mongoose.Schema({
 	issue_title: { type: String, required: true },
 	issue_text: { type: String, required: true },
-	created_by: { type: String, required: true },
+	created_by: { type: String, required: true, immutable: true },
 	assigned_to: String,
 	status_text: String,
 	open: { type: Boolean, required: true },
-	created_on: { type: Date, required: true }, // added required to prevent unexpected values: "" will be added to the database as null. helper.validateDate() doesn't catch the error and returns the current time instead. See https://github.com/Automattic/mongoose/issues/2438
+	created_on: { type: Date, required: true, immutable: true }, // added required to prevent unexpected values: "" will be added to the database as null. helper.validateDate() doesn't catch the error and returns the current time instead. See https://github.com/Automattic/mongoose/issues/2438
 	updated_on: { type: Date, required: true },
 	project: { type: String, required: true },
 });
