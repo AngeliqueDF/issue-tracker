@@ -71,8 +71,8 @@ suite("Functional Tests", function () {
 						res.body.status_text,
 						ALL_FIELDS_EXPECTED_RESPONSE.status_text
 					);
+					done();
 				});
-			done();
 		});
 
 		test("Return true for the 'open' property by default", function (done) {
@@ -83,8 +83,8 @@ suite("Functional Tests", function () {
 				.end((err, res) => {
 					assert.isBoolean(res.body.open);
 					assert.isTrue(res.body.open);
+					done();
 				});
-			done();
 		});
 
 		test("Return an error object when a required field is missing", function (done) {
@@ -98,9 +98,8 @@ suite("Functional Tests", function () {
 					assert.equal(res.type, "application/json");
 					assert.property(res.body, "error");
 					assert.equal(res.body.error, "required field(s) missing");
+					done();
 				});
-
-			done();
 		});
 
 		test("Excluded optional fields return an empty string.", function (done) {
@@ -124,9 +123,8 @@ suite("Functional Tests", function () {
 				.end((err, res) => {
 					assert.equal(res.body.assigned_to, requiredOnlyResponse.assigned_to);
 					assert.equal(res.body.status_text, requiredOnlyResponse.status_text);
+					done();
 				});
-
-			done();
 		});
 	});
 
