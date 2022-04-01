@@ -418,5 +418,20 @@ suite("Functional Tests", function () {
 				});
 		});
 
+		test("When no _id is provided, return { error: 'missing _id' } in JSON", function (done) {
+			this.timeout(10000);
+			const UPDATE_ONE_FIELD_REQUEST_BODY = {
+				assigned_to: "Angélique",
+			};
+			chai
+				.request(server)
+				.put(PUT_TESTS_URL)
+				.send({ UPDATE_ONE_FIELD_REQUEST_BODY })
+				.end((err, res) => {
+					assert.equal(res.body.error, "missing _id");
+				});
+			done();
+		});
+
 	});
 });
