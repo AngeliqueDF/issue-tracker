@@ -62,6 +62,20 @@ module.exports = function (app) {
 				}
 				next();
 			},
+			(req, res, next) => {
+				// Checks fields to update were provided
+				const fieldsProvided = Object.keys(req.body);
+				const nbFields = fieldsProvided.length;
+
+				if (nbFields === 1 && fieldsProvided[0] === "_id") {
+					const updateFieldsMissing = new Error("no update field(s) sent");
+					updateFieldsMissing.name = "UpdateFieldsMissing";
+					updateFieldsMissing["_id"] = _id;
+
+					next(updateFieldsMissing);
+				}
+				next();
+			},
 		)
 
 		.delete(function (req, res) {
