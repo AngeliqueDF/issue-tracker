@@ -306,4 +306,100 @@ suite("Functional Tests", function () {
 				});
 		});
 	});
+
+	suite('PUT requests to "/api/issues/{project}"', function () {
+		const PUT_TESTS_URL = API_URL + "/put_requests/";
+		beforeEach(function (done) {
+			chai
+				.request(server)
+				.post(PUT_TESTS_URL)
+				.send(ALL_FIELDS_POST_REQUEST)
+				.end((err, res) => {
+					// console.log("test issue added", res.body);
+					this.timeout(10000);
+					done();
+				});
+		});
+
+		afterEach(function () {
+			Issue.deleteMany({});
+		});
+
+		test("Update one field on an issue", function (done) {
+			const UPDATE_ONE_FIELD_REQUEST_BODY = {
+				issue_title: "Issue title modified by PUT request.",
+			};
+			this.timeout(10000);
+			chai
+				.request(server)
+				.get(PUT_TESTS_URL)
+				.end((err, res) => {
+					// Find the issue to update
+					const { _id } = res.body[0];
+
+					chai
+						.request(server)
+						.put(PUT_TESTS_URL)
+						.send({ ...UPDATE_ONE_FIELD_REQUEST_BODY, _id })
+						.end((err, res) => {
+							// Update the issue
+							chai
+								.request(server)
+								.get(PUT_TESTS_URL)
+								.end(function (err, res) {
+									// Assert it was updated
+									assert.equal(
+										res.body[0].issue_title,
+										UPDATE_ONE_FIELD_REQUEST_BODY.issue_title
+									);
+								});
+						});
+					done();
+				});
+		});
+
+		test("Update multiple fields on an issue", function (done) {
+			this.timeout(10000);
+			const UPDATE_MULTIPLE_FIELDS_REQUEST_BODY = {
+				issue_title: "Issue title modified by PUT request.",
+				issue_text: "Issue text modified by PUT request.",
+				assigned_to: "Angélique",
+			};
+			chai
+				.request(server)
+				.get(PUT_TESTS_URL)
+				.end((err, res) => {
+					// Find the issue's _id to update it
+					const { _id } = res.body[0];
+
+					// Update the issue
+					chai
+						.request(server)
+						.put(PUT_TESTS_URL)
+						.send({ ...UPDATE_MULTIPLE_FIELDS_REQUEST_BODY, _id })
+						.end((err, res) => {
+							// Find the updated issue
+							chai
+								.request(server)
+								.get(PUT_TESTS_URL)
+								.end(function (err, res) {
+									// Check all fields updated have the correct value
+									assert.equal(
+										res.body[0].issue_title,
+										UPDATE_MULTIPLE_FIELDS_REQUEST_BODY.issue_title
+									);
+									assert.equal(
+										res.body[0].issue_text,
+										UPDATE_MULTIPLE_FIELDS_REQUEST_BODY.issue_text
+									);
+									assert.equal(
+										res.body[0].assigned_to,
+										UPDATE_MULTIPLE_FIELDS_REQUEST_BODY.assigned_to
+									);
+								});
+						});
+					done();
+				});
+		});
+	});
 });
