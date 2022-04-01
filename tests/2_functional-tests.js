@@ -297,4 +297,24 @@ suite("Functional Tests", function () {
 				});
 		});
 	});
+
+	suite('PUT requests to "/api/issues/{project}"', function () {
+		const PUT_TESTS_URL = API_URL + "/put_requests/";
+		beforeEach(function (done) {
+			chai
+				.request(server)
+				.post(PUT_TESTS_URL)
+				.send(ALL_FIELDS_POST_REQUEST)
+				.end((err, res) => {
+					// console.log("test issue added", res.body);
+					this.timeout(10000);
+					done();
+				});
+		});
+
+		afterEach(function () {
+			Issue.deleteMany({});
+		});
+
+	});
 });
