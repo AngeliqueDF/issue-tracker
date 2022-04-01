@@ -1,4 +1,5 @@
 "use strict";
+const { findOneAndUpdate } = require("./../models/issue");
 const Issue = require("./../models/issue");
 const mongoose = require("mongoose");
 
@@ -76,6 +77,26 @@ module.exports = function (app) {
 				}
 				next();
 			},
+			async (req, res, next) => {
+				// Updates the issue
+				// let project = req.params.project;
+				const { _id: filter, ...update } = req.body;
+				try {
+					const updatedIssue = await Issue.findByIdAndUpdate(
+						filter,
+						{ ...update, updated_on: new Date() },
+						{
+							new: true,
+						}
+					);
+					res.json({
+						result: "successfully updated",
+						_id: updatedIssue["_id"],
+					});
+				} catch (error) {
+					console.log(error);
+				}
+			}
 		)
 
 		.delete(function (req, res) {
