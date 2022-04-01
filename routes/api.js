@@ -1,5 +1,6 @@
 "use strict";
 const Issue = require("./../models/issue");
+const mongoose = require("mongoose");
 
 module.exports = function (app) {
 	app
@@ -46,6 +47,18 @@ module.exports = function (app) {
 					missingIdError.name = "MissingIdField";
 
 					next(missingIdError);
+				}
+				next();
+			},
+			(req, res, next) => {
+				// Checks the _id is valid
+				const { _id } = req.body;
+				idIsValid = mongoose.Types.ObjectId.isValid(_id);
+
+				if (idIsValid === false) {
+					const CouldNotUpdate = new Error("could not update");
+					CouldNotUpdate.name = "CouldNotUpdate";
+					next(CouldNotUpdate);
 				}
 				next();
 			},
