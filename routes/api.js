@@ -36,9 +36,20 @@ module.exports = function (app) {
 			}
 		})
 
-		.put(function (req, res) {
-			let project = req.params.project;
-		})
+		.put(
+			(req, res, next) => {
+				// Checks for a missing _id
+				const _id = req.body["_id"];
+
+				if (!_id) {
+					const missingIdError = new Error("missing _id");
+					missingIdError.name = "MissingIdField";
+
+					next(missingIdError);
+				}
+				next();
+			},
+		)
 
 		.delete(function (req, res) {
 			let project = req.params.project;
