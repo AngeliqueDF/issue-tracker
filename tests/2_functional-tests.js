@@ -459,5 +459,15 @@ suite("Functional Tests", function () {
 				});
 		});
 
+		test("On any other error, return { error: 'could not update', '_id': _id } in JSON", function (done) {
+			chai
+				.request(server)
+				.put(PUT_TESTS_URL)
+				.send({ _id: "invalid id", issue_title: "issue title" })
+				.end((err, res) => {
+					assert.equal(res.body.error, "could not update");
+				});
+			done();
+		});
 	});
 });
