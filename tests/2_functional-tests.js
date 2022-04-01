@@ -6,13 +6,12 @@ const server = require("../server");
 chai.use(chaiHttp);
 
 const helper = require("./../utils/helper");
+
 const Issue = require("./../models/issue");
 
-const API_URL = "/api/issues";
-
 suite("Functional Tests", function () {
-	const POST_PROJECT = "post_requests";
-	const POST_TESTS_URL = API_URL + "/" + POST_PROJECT;
+	const API_URL = "/api/issues";
+
 	const ALL_FIELDS_POST_REQUEST = {
 		issue_title: "A request with all fields",
 		issue_text: "When we post data it has an error.",
@@ -20,7 +19,16 @@ suite("Functional Tests", function () {
 		assigned_to: "Joe",
 		status_text: "In QA",
 	};
+
 	suite("POST requests to /api/issues/{project}", function () {
+		const POST_PROJECT = "post_requests";
+		const POST_TESTS_URL = API_URL + "/" + POST_PROJECT;
+
+		this.beforeEach((done) => {
+			this.timeout(10000);
+			done();
+		});
+
 		test("Create an issue when all fields are provided", function (done) {
 			// Doesn't include date properties "created_on" and "updated_on"
 			const ALL_FIELDS_EXPECTED_RESPONSE = {
@@ -83,8 +91,8 @@ suite("Functional Tests", function () {
 				.end((err, res) => {
 					assert.isBoolean(res.body.open);
 					assert.isTrue(res.body.open);
-					done();
 				});
+			done();
 		});
 
 		test("Return an error object when a required field is missing", function (done) {
@@ -130,7 +138,6 @@ suite("Functional Tests", function () {
 
 	suite("GET requests to /api/issues/{project}", function () {
 		const GET_PROJECT_ONE = "get_requests";
-		const GET_PROJECT_TWO = "get_requests";
 		const GET_TESTS_URL = API_URL + "/" + GET_PROJECT_ONE;
 
 		const ISSUE_ONE = {
@@ -154,7 +161,8 @@ suite("Functional Tests", function () {
 			open: "false",
 		};
 
-		beforeEach(function () {
+		beforeEach(function (done) {
+			this.timeout(10000);
 			[ISSUE_ONE, ISSUE_TWO, ISSUE_THREE].forEach(async (issue) => {
 				chai
 					.request(server)
@@ -167,6 +175,7 @@ suite("Functional Tests", function () {
 						// console.log("error:", err);
 					});
 			});
+			done();
 		});
 
 		afterEach(async function () {
