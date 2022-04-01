@@ -18,5 +18,15 @@ module.exports = {
 			// freeCodeCamp tests do not pass if status codes are defined
 			res.json({ error: "required field(s) missing" });
 		}
+		if (err.name === "MissingIdField") {
+			// Middleware to check the PUT request provided an _id
+			res.json({ error: err.message });
+		}
+		if (err.name === "UpdateFieldsMissing") {
+			res.json({ error: err.message, _id: err["_id"] });
+		}
+		if (err.name === "CouldNotUpdate") {
+			res.json({ error: err.message, _id: err["_id"] });
+		}
 	},
 };
