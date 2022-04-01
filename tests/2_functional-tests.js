@@ -316,5 +316,38 @@ suite("Functional Tests", function () {
 			Issue.deleteMany({});
 		});
 
+		test("Update one field on an issue", function (done) {
+			const UPDATE_ONE_FIELD_REQUEST_BODY = {
+				issue_title: "Issue title modified by PUT request.",
+			};
+			this.timeout(10000);
+			chai
+				.request(server)
+				.get(PUT_TESTS_URL)
+				.end((err, res) => {
+					// Find the issue to update
+					const { _id } = res.body[0];
+
+					chai
+						.request(server)
+						.put(PUT_TESTS_URL)
+						.send({ ...UPDATE_ONE_FIELD_REQUEST_BODY, _id })
+						.end((err, res) => {
+							// Update the issue
+							chai
+								.request(server)
+								.get(PUT_TESTS_URL)
+								.end(function (err, res) {
+									// Assert it was updated
+									assert.equal(
+										res.body[0].issue_title,
+										UPDATE_ONE_FIELD_REQUEST_BODY.issue_title
+									);
+								});
+						});
+					done();
+				});
+		});
+
 	});
 });
