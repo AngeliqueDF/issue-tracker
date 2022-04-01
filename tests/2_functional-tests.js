@@ -441,5 +441,23 @@ suite("Functional Tests", function () {
 			done();
 		});
 
+		test("When no field to update is provided, return { error: 'no update field(s) sent', '_id': _id } in JSON", function (done) {
+			chai
+				.request(server)
+				.get(PUT_TESTS_URL)
+				.end((err, res) => {
+					const { _id } = res.body[0];
+
+					chai
+						.request(server)
+						.put(PUT_TESTS_URL)
+						.send({ _id })
+						.end((err, res) => {
+							assert.equal(res.body.error, "no update field(s) sent");
+						});
+					done();
+				});
+		});
+
 	});
 });
