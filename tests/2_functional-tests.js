@@ -6,6 +6,8 @@ const server = require("../server");
 chai.use(chaiHttp);
 
 const helper = require("./../utils/helper");
+
+const mongoose = require("mongoose");
 const Issue = require("./../models/issue");
 
 const API_URL = "/api/issues";
@@ -392,5 +394,29 @@ suite("Functional Tests", function () {
 					done();
 				});
 		});
+
+		test("On success, return {  result: 'successfully updated', '_id': _id } in JSON", function (done) {
+			const UPDATE_ONE_FIELD_REQUEST_BODY = {
+				assigned_to: "Angélique",
+			};
+			chai
+				.request(server)
+				.get(PUT_TESTS_URL)
+				.end((err, res) => {
+					const { _id } = res.body[0];
+
+					chai
+						.request(server)
+						.put(PUT_TESTS_URL)
+						.send({ ...UPDATE_ONE_FIELD_REQUEST_BODY, _id })
+						.end((err, res) => {
+							// The _id is changed by the server, but we can validate the new one
+							assert.isTrue(mongoose.Types.ObjectId.isValid(res.body["_id"]));
+							assert.equal(res.body.result, "successfully updated");
+						});
+					done();
+				});
+		});
+
 	});
 });
