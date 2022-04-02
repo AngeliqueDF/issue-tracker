@@ -542,5 +542,19 @@ suite("Functional Tests", function () {
 				});
 		});
 
+		test("Return { error: 'missing _id' } when no _id is provided", function (done) {
+			// Sending a request with an empty body
+			chai
+				.request(server)
+				.delete(DELETE_TESTS_URL)
+				.send({})
+				.end((err, res) => {
+					// Asserting the server returns the proper JSON response
+					assert.equal(res.body.error, "missing _id");
+					done();
+				});
+		});
+	});
+
 	});
 });
