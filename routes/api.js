@@ -102,7 +102,7 @@ module.exports = function (app) {
 		.delete(async function (req, res) {
 			try {
 				const deletedIssue = await Issue.findByIdAndDelete(req.body["_id"]);
-				res.json(deletedIssue);
+				res.json({ result: "successfully deleted", _id: deletedIssue["_id"] });
 			} catch (error) {
 				console.log(error);
 			}
