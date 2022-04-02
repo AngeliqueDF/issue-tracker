@@ -99,7 +99,12 @@ module.exports = function (app) {
 			}
 		)
 
-		.delete(function (req, res) {
-			let project = req.params.project;
+		.delete(async function (req, res) {
+			try {
+				const deletedIssue = await Issue.findByIdAndDelete(req.body["_id"]);
+				res.json(deletedIssue);
+			} catch (error) {
+				console.log(error);
+			}
 		});
 };
