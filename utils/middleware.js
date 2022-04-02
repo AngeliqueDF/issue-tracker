@@ -39,5 +39,8 @@ module.exports = {
 		if (err.name === "CouldNotUpdate") {
 			res.json({ error: err.message, _id: err["_id"] });
 		}
+		if (req.method === "DELETE") {
+			res.json({ error: "could not delete", _id: req.body["_id"] });
+		}
 	},
 };
