@@ -12,6 +12,18 @@ module.exports = {
 		}
 		next();
 	},
+	missingId: (req, res, next) => {
+		// Checks for a missing _id
+		const _id = req.body["_id"];
+
+		if (!_id) {
+			const missingIdError = new Error("missing _id");
+			missingIdError.name = "MissingIdField";
+
+			next(missingIdError);
+		}
+		next();
+	},
 	errorHandler: (err, req, res, next) => {
 		if (err.name === "ValidationError") {
 			// freeCodeCamp tests do not pass if status codes are defined
