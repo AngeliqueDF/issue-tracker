@@ -2,6 +2,7 @@
 const { findOneAndUpdate } = require("./../models/issue");
 const Issue = require("./../models/issue");
 const mongoose = require("mongoose");
+const middleware = require("./../utils/middleware");
 
 module.exports = function (app) {
 	app
@@ -39,18 +40,7 @@ module.exports = function (app) {
 		})
 
 		.put(
-			(req, res, next) => {
-				// Checks for a missing _id
-				const _id = req.body["_id"];
-
-				if (!_id) {
-					const missingIdError = new Error("missing _id");
-					missingIdError.name = "MissingIdField";
-
-					next(missingIdError);
-				}
-				next();
-			},
+			middleware.missingId,
 			(req, res, next) => {
 				// Checks the _id is valid
 				const { _id } = req.body;
