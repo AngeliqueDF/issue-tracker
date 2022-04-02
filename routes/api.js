@@ -92,9 +92,13 @@ module.exports = function (app) {
 		.delete(middleware.missingId, async function (req, res, next) {
 			try {
 				const deletedIssue = await Issue.findByIdAndDelete(req.body["_id"]);
-				res.json({ result: "successfully deleted", _id: deletedIssue["_id"] });
+				res.json({
+					result: "successfully deleted",
+					_id: deletedIssue["_id"],
+				});
 			} catch (error) {
 				console.log(error);
+				next(error);
 			}
 		});
 };
