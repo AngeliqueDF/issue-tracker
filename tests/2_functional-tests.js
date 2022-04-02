@@ -474,18 +474,19 @@ suite("Functional Tests", function () {
 
 	suite.only("DELETE requests to /api/issues/{project}", function () {
 		const DELETE_TESTS_URL = API_URL + "/delete_requests/";
-		beforeEach(function () {
+		beforeEach(function (done) {
 			chai
 				.request(server)
 				.post(DELETE_TESTS_URL)
 				.send(ALL_FIELDS_POST_REQUEST)
 				.end((err, res) => {
-					console.log(res.body);
+					done();
 				});
 		});
 
-		afterEach(function () {
+		afterEach(function (done) {
 			issue.deleteMany({});
+			done();
 		});
 
 		test("Delete an issue when the _id is provided", function (done) {
