@@ -519,5 +519,28 @@ suite("Functional Tests", function () {
 						});
 				});
 		});
+
+		test("When the issue is successfully deleted, return{ result: 'successfully deleted', '_id': _id }", function (done) {
+			// Finding the _id of the issue added in the beforeEach hook
+			chai
+				.request(server)
+				.get(DELETE_TESTS_URL)
+				.end((err, res) => {
+					const { _id } = res.body[0];
+
+					// Sending the DELETE request
+					chai
+						.request(server)
+						.delete(DELETE_TESTS_URL)
+						.send({ _id })
+						.end((err, res) => {
+							// Asserting the server returns the proper JSON response
+							assert.equal(res.body.result, "successfully deleted");
+							assert.equal(res.body["_id"], _id);
+							done();
+						});
+				});
+		});
+
 	});
 });
