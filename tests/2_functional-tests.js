@@ -9,6 +9,7 @@ const helper = require("./../utils/helper");
 
 const mongoose = require("mongoose");
 const Issue = require("./../models/issue");
+const issue = require("./../models/issue");
 
 suite("Functional Tests", function () {
 	const API_URL = "/api/issues";
@@ -469,5 +470,23 @@ suite("Functional Tests", function () {
 				});
 			done();
 		});
+	});
+
+	suite.only("DELETE requests to /api/issues/{project}", function () {
+		const DELETE_TESTS_URL = API_URL + "/delete_requests/";
+		beforeEach(function () {
+			chai
+				.request(server)
+				.post(DELETE_TESTS_URL)
+				.send(ALL_FIELDS_POST_REQUEST)
+				.end((err, res) => {
+					console.log(res.body);
+				});
+		});
+
+		afterEach(function () {
+			issue.deleteMany({});
+		});
+
 	});
 });
