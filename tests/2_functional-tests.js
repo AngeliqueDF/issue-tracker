@@ -556,5 +556,18 @@ suite("Functional Tests", function () {
 		});
 	});
 
+	test("When the deletion fails, return { error: 'could not delete', '_id': _id }", function (done) {
+		this.timeout(10000);
+		// Generating a random mongoose object id for an non existing issue
+		const randomObjectId = mongoose.Types.ObjectId();
+		chai
+			.request(server)
+			.delete(DELETE_TESTS_URL)
+			.send({ _id: randomObjectId })
+			.end((err, res) => {
+				// Asserting the server returns the proper JSON response
+				assert.equal(res.body.error, "could not delete");
+			});
+		done();
 	});
 });
