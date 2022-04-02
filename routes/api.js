@@ -42,18 +42,6 @@ module.exports = function (app) {
 		.put(
 			middleware.missingId,
 			(req, res, next) => {
-				// Checks the _id is valid
-				const { _id } = req.body;
-				idIsValid = mongoose.Types.ObjectId.isValid(_id);
-
-				if (idIsValid === false) {
-					const CouldNotUpdate = new Error("could not update");
-					CouldNotUpdate.name = "CouldNotUpdate";
-					next(CouldNotUpdate);
-				}
-				next();
-			},
-			(req, res, next) => {
 				// Checks fields to update were provided
 				const fieldsProvided = Object.keys(req.body);
 				const nbFields = fieldsProvided.length;
