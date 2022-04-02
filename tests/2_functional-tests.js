@@ -488,5 +488,35 @@ suite("Functional Tests", function () {
 			issue.deleteMany({});
 		});
 
+		test("Delete an issue when the _id is provided", function (done) {
+			// Finding the _id of the issue added in the beforeEach hook
+			chai
+				.request(server)
+				.get(DELETE_TESTS_URL)
+				.end((err, res) => {
+					const { _id } = res.body[0];
+
+					// Sending the DELETE request
+					chai
+						.request(server)
+						.delete(DELETE_TESTS_URL)
+						.send({ _id })
+						.end((err, res) => {
+							// Requesting all issues belonging to the delete_requests project
+							chai
+								.request(server)
+								.get(DELETE_TESTS_URL)
+								.end((err, res) => {
+									const deletedIssue = res.body.find((i) => i["_id"] === _id);
+
+									// Asserting the issue was deleted
+									assert.isUndefined(deletedIssue);
+									assert.lengthOf(res.body, 0);
+
+									done();
+								});
+						});
+				});
+		});
 	});
 });
