@@ -1,4 +1,3 @@
-const { loadFilesAsync } = require("mocha/lib/esm-utils");
 const validator = require("validator");
 
 module.exports = {
@@ -10,6 +9,18 @@ module.exports = {
 		for (const key in req.body) {
 			// Replacing each value by its escaped equivalent
 			req.body[key] = validator.escape(req.body[key]);
+		}
+		next();
+	},
+	missingId: (req, res, next) => {
+		// Checks for a missing _id
+		const _id = req.body["_id"];
+
+		if (!_id) {
+			const missingIdError = new Error("missing _id");
+			missingIdError.name = "MissingIdField";
+
+			next(missingIdError);
 		}
 		next();
 	},
@@ -27,6 +38,9 @@ module.exports = {
 		}
 		if (err.name === "CouldNotUpdate") {
 			res.json({ error: err.message, _id: err["_id"] });
+		}
+		if (req.method === "DELETE") {
+			res.json({ error: "could not delete", _id: req.body["_id"] });
 		}
 	},
 };

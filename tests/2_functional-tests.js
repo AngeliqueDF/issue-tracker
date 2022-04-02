@@ -9,6 +9,7 @@ const helper = require("./../utils/helper");
 
 const mongoose = require("mongoose");
 const Issue = require("./../models/issue");
+const issue = require("./../models/issue");
 
 suite("Functional Tests", function () {
 	const API_URL = "/api/issues";
@@ -469,5 +470,104 @@ suite("Functional Tests", function () {
 				});
 			done();
 		});
+	});
+
+	suite.only("DELETE requests to /api/issues/{project}", function () {
+		const DELETE_TESTS_URL = API_URL + "/delete_requests/";
+		beforeEach(function (done) {
+			chai
+				.request(server)
+				.post(DELETE_TESTS_URL)
+				.send(ALL_FIELDS_POST_REQUEST)
+				.end((err, res) => {
+					done();
+				});
+		});
+
+		afterEach(function (done) {
+			issue.deleteMany({});
+			done();
+		});
+
+		test("Delete an issue when the _id is provided", function (done) {
+			// Finding the _id of the issue added in the beforeEach hook
+			chai
+				.request(server)
+				.get(DELETE_TESTS_URL)
+				.end((err, res) => {
+					const { _id } = res.body[0];
+
+					// Sending the DELETE request
+					chai
+						.request(server)
+						.delete(DELETE_TESTS_URL)
+						.send({ _id })
+						.end((err, res) => {
+							// Requesting all issues belonging to the delete_requests project
+							chai
+								.request(server)
+								.get(DELETE_TESTS_URL)
+								.end((err, res) => {
+									const deletedIssue = res.body.find((i) => i["_id"] === _id);
+
+									// Asserting the issue was deleted
+									assert.isUndefined(deletedIssue);
+									assert.lengthOf(res.body, 0);
+
+									done();
+								});
+						});
+				});
+		});
+
+		test("When the issue is successfully deleted, return{ result: 'successfully deleted', '_id': _id }", function (done) {
+			// Finding the _id of the issue added in the beforeEach hook
+			chai
+				.request(server)
+				.get(DELETE_TESTS_URL)
+				.end((err, res) => {
+					const { _id } = res.body[0];
+
+					// Sending the DELETE request
+					chai
+						.request(server)
+						.delete(DELETE_TESTS_URL)
+						.send({ _id })
+						.end((err, res) => {
+							// Asserting the server returns the proper JSON response
+							assert.equal(res.body.result, "successfully deleted");
+							assert.equal(res.body["_id"], _id);
+							done();
+						});
+				});
+		});
+
+		test("Return { error: 'missing _id' } when no _id is provided", function (done) {
+			// Sending a request with an empty body
+			chai
+				.request(server)
+				.delete(DELETE_TESTS_URL)
+				.send({})
+				.end((err, res) => {
+					// Asserting the server returns the proper JSON response
+					assert.equal(res.body.error, "missing _id");
+					done();
+				});
+		});
+	});
+
+	test("When the deletion fails, return { error: 'could not delete', '_id': _id }", function (done) {
+		this.timeout(10000);
+		// Generating a random mongoose object id for an non existing issue
+		const randomObjectId = mongoose.Types.ObjectId();
+		chai
+			.request(server)
+			.delete(DELETE_TESTS_URL)
+			.send({ _id: randomObjectId })
+			.end((err, res) => {
+				// Asserting the server returns the proper JSON response
+				assert.equal(res.body.error, "could not delete");
+			});
+		done();
 	});
 });
