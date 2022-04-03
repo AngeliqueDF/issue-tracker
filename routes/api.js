@@ -49,7 +49,7 @@ module.exports = function (app) {
 				if (nbFields === 1 && fieldsProvided[0] === "_id") {
 					const updateFieldsMissing = new Error("no update field(s) sent");
 					updateFieldsMissing.name = "UpdateFieldsMissing";
-					updateFieldsMissing["_id"] = _id;
+					updateFieldsMissing["_id"] = req.body["_id"];
 
 					next(updateFieldsMissing);
 				}
