@@ -57,7 +57,6 @@ module.exports = function (app) {
 			},
 			async (req, res, next) => {
 				// Updates the issue
-				// let project = req.params.project;
 				const { _id: filter, ...update } = req.body;
 				try {
 					const updatedIssue = await Issue.findByIdAndUpdate(
@@ -73,6 +72,10 @@ module.exports = function (app) {
 					});
 				} catch (error) {
 					console.log(error);
+					const CouldNotUpdate = new Error("could not update");
+					CouldNotUpdate.name = "CouldNotUpdate";
+					CouldNotUpdate["_id"] = filter;
+					next(CouldNotUpdate);
 				}
 			}
 		)
