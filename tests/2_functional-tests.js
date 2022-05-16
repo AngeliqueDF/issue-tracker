@@ -29,7 +29,7 @@ suite("Functional Tests", function () {
 			done();
 		});
 
-		test("Create an issue when all fields are provided", function (done) {
+		test("Create an issue with every field", function (done) {
 			// Doesn't include date properties "created_on" and "updated_on"
 			const ALL_FIELDS_EXPECTED_RESPONSE = {
 				issue_title: "A request with all fields",
@@ -82,7 +82,7 @@ suite("Functional Tests", function () {
 					done();
 				});
 		});
-
+		// CHANGE OR DELETE
 		test("Return true for the 'open' property by default", function (done) {
 			chai
 				.request(server)
@@ -95,7 +95,7 @@ suite("Functional Tests", function () {
 			done();
 		});
 
-		test("Return an error object when a required field is missing", function (done) {
+		test("Create an issue with missing required fields (return an error object when a required field is missing)", function (done) {
 			chai
 				.request(server)
 				.post(POST_TESTS_URL)
@@ -110,7 +110,7 @@ suite("Functional Tests", function () {
 				});
 		});
 
-		test("Excluded optional fields return an empty string.", function (done) {
+		test("Excluded optional fields return an empty string (create an issue with only required fields provided).", function (done) {
 			const requiredOnly = {
 				issue_title: "Fix error in posting data",
 				issue_text: "When we post data it has an error.",
@@ -169,11 +169,7 @@ suite("Functional Tests", function () {
 					.post(GET_TESTS_URL)
 					.set("Content-Type", "application/json")
 					.send(issue)
-					.end(function (err, res) {
-						// console.log(res.status);
-						// console.log("request body:", res.body);
-						// console.log("error:", err);
-					});
+					.end(function (err, res) {});
 			});
 			done();
 		});
@@ -237,7 +233,7 @@ suite("Functional Tests", function () {
 				});
 		});
 
-		test("Return an array of all issues for the project specified in the URL", function (done) {
+		test("View issues on a project (return an array of all issues for the project specified in the URL).", function (done) {
 			// Adding an issue for a different project, 'different_project', than the others which belong to the 'get_requests' project.
 			chai
 				.request(server)
@@ -271,7 +267,7 @@ suite("Functional Tests", function () {
 				});
 		});
 
-		test("Allow filtering the request by passing a field and value as a URL query", function (done) {
+		test("View issues on a project with one filter (using a URL query).", function (done) {
 			const URL_QUERY = {
 				open: false,
 			};
@@ -288,7 +284,8 @@ suite("Functional Tests", function () {
 				});
 		});
 
-		test("Allow filtering the request by passing multiple fields and values as a URL query", function (done) {
+		// View issues on a project with multiple filters
+		test("View issues on a project with multiple filters (using a URL query).", function (done) {
 			const URL_QUERY = {
 				created_by: ISSUE_TWO.created_by,
 				open: "true",
@@ -304,6 +301,273 @@ suite("Functional Tests", function () {
 					});
 					done();
 				});
+		});
+	});
+
+	suite('PUT requests to "/api/issues/{project}"', function () {
+		const PUT_TESTS_URL = API_URL + "/put_requests/";
+		beforeEach(function (done) {
+			this.timeout(10000);
+			chai
+				.request(server)
+				.post(PUT_TESTS_URL)
+				.send(ALL_FIELDS_POST_REQUEST)
+				.end((err, res) => {});
+			done();
+		});
+
+		afterEach(function (done) {
+			this.timeout(10000);
+			Issue.deleteMany({});
+			done();
+		});
+
+		test("Update one field on an issue", function (done) {
+			const UPDATE_ONE_FIELD_REQUEST_BODY = {
+				issue_title: "Issue title modified by PUT request.",
+			};
+			this.timeout(10000);
+			chai
+				.request(server)
+				.get(PUT_TESTS_URL)
+				.end((err, res) => {
+					// Find the issue to update
+					const { _id } = res.body[0];
+
+					chai
+						.request(server)
+						.put(PUT_TESTS_URL)
+						.send({ ...UPDATE_ONE_FIELD_REQUEST_BODY, _id })
+						.end((err, res) => {
+							// Update the issue
+							chai
+								.request(server)
+								.get(PUT_TESTS_URL)
+								.end(function (err, res) {
+									// console.log(res.body);
+									// Assert it was updated
+									assert.equal(
+										res.body[0].issue_title,
+										UPDATE_ONE_FIELD_REQUEST_BODY.issue_title
+									);
+									done();
+								});
+						});
+				});
+		});
+
+		test("Update multiple fields on an issue", function (done) {
+			this.timeout(20000);
+			const UPDATE_MULTIPLE_FIELDS_REQUEST_BODY = {
+				issue_title: "Issue title modified by PUT request.",
+				issue_text: "Issue text modified by PUT request.",
+				assigned_to: "Angélique",
+			};
+			chai
+				.request(server)
+				.get(PUT_TESTS_URL)
+				.end((err, res) => {
+					// Find the issue's _id to update it
+					const { _id } = res.body[0];
+
+					// Update the issue
+					chai
+						.request(server)
+						.put(PUT_TESTS_URL)
+						.send({ ...UPDATE_MULTIPLE_FIELDS_REQUEST_BODY, _id })
+						.end((err, res) => {
+							// Find the updated issue
+							res.body;
+							chai
+								.request(server)
+								.get(PUT_TESTS_URL)
+								.end(function (err, res) {
+									// Check all fields updated have the correct value
+									assert.equal(
+										res.body[0].issue_title,
+										UPDATE_MULTIPLE_FIELDS_REQUEST_BODY.issue_title
+									);
+									assert.equal(
+										res.body[0].issue_text,
+										UPDATE_MULTIPLE_FIELDS_REQUEST_BODY.issue_text
+									);
+									assert.equal(
+										res.body[0].assigned_to,
+										UPDATE_MULTIPLE_FIELDS_REQUEST_BODY.assigned_to
+									);
+
+									done();
+								});
+						});
+					// done();
+				});
+		});
+
+		test("On success, return {  result: 'successfully updated', '_id': _id } in JSON", function (done) {
+			const UPDATE_ONE_FIELD_REQUEST_BODY = {
+				assigned_to: "Angélique",
+			};
+			chai
+				.request(server)
+				.get(PUT_TESTS_URL)
+				.end((err, res) => {
+					const { _id } = res.body[0];
+
+					chai
+						.request(server)
+						.put(PUT_TESTS_URL)
+						.send({ ...UPDATE_ONE_FIELD_REQUEST_BODY, _id })
+						.end((err, res) => {
+							// The _id is changed by the server, but we can validate the new one
+							assert.isTrue(mongoose.Types.ObjectId.isValid(res.body["_id"]));
+							assert.equal(res.body.result, "successfully updated");
+
+							done();
+						});
+				});
+			// done();
+		});
+
+		test("Update an issue with missing _id", function (done) {
+			this.timeout(10000);
+			const UPDATE_ONE_FIELD_REQUEST_BODY = {
+				assigned_to: "Angélique",
+			};
+			chai
+				.request(server)
+				.put(PUT_TESTS_URL)
+				.send({ UPDATE_ONE_FIELD_REQUEST_BODY })
+				.end((err, res) => {
+					assert.equal(res.body.error, "missing _id");
+				});
+			done();
+		});
+
+		test("Update an issue with no fields to update", function (done) {
+			chai
+				.request(server)
+				.get(PUT_TESTS_URL)
+				.end((err, res) => {
+					const { _id } = res.body[0];
+
+					chai
+						.request(server)
+						.put(PUT_TESTS_URL)
+						.send({ _id })
+						.end((err, res) => {
+							assert.equal(res.body.error, "no update field(s) sent");
+						});
+					done();
+				});
+		});
+
+		test("Update an issue with an invalid _id", function (done) {
+			chai
+				.request(server)
+				.put(PUT_TESTS_URL)
+				.send({ _id: "invalid id", issue_title: "issue title" })
+				.end((err, res) => {
+					assert.equal(res.body.error, "could not update");
+				});
+			done();
+		});
+	});
+
+	suite("DELETE requests to /api/issues/{project}", function () {
+		const DELETE_TESTS_URL = API_URL + "/delete_requests/";
+		beforeEach(function (done) {
+			chai
+				.request(server)
+				.post(DELETE_TESTS_URL)
+				.send(ALL_FIELDS_POST_REQUEST)
+				.end((err, res) => {});
+			done();
+		});
+
+		afterEach(function (done) {
+			issue.deleteMany({});
+			done();
+		});
+
+		test("Delete an issue (when the _id is provided)", function (done) {
+			// Finding the _id of the issue added in the beforeEach hook
+			chai
+				.request(server)
+				.get(DELETE_TESTS_URL)
+				.end((err, res) => {
+					const { _id } = res.body[0];
+
+					// Sending the DELETE request
+					chai
+						.request(server)
+						.delete(DELETE_TESTS_URL)
+						.send({ _id })
+						.end((err, res) => {
+							// Requesting all issues belonging to the delete_requests project
+							chai
+								.request(server)
+								.get(DELETE_TESTS_URL)
+								.end((err, res) => {
+									const deletedIssue = res.body.find((i) => i["_id"] === _id);
+
+									// Asserting the issue was deleted
+									assert.isUndefined(deletedIssue);
+									assert.lengthOf(res.body, 0);
+
+									done();
+								});
+						});
+				});
+		});
+
+		test("When the issue is successfully deleted, return{ result: 'successfully deleted', '_id': _id }", function (done) {
+			// Finding the _id of the issue added in the beforeEach hook
+			chai
+				.request(server)
+				.get(DELETE_TESTS_URL)
+				.end((err, res) => {
+					const { _id } = res.body[0];
+
+					// Sending the DELETE request
+					chai
+						.request(server)
+						.delete(DELETE_TESTS_URL)
+						.send({ _id })
+						.end((err, res) => {
+							// Asserting the server returns the proper JSON response
+							assert.equal(res.body.result, "successfully deleted");
+							assert.equal(res.body["_id"], _id);
+							done();
+						});
+				});
+		});
+
+		test("Delete an issue with missing _id", function (done) {
+			// Sending a request with an empty body
+			chai
+				.request(server)
+				.delete(DELETE_TESTS_URL)
+				.send({})
+				.end((err, res) => {
+					// Asserting the server returns the proper JSON response
+					assert.equal(res.body.error, "missing _id");
+					done();
+				});
+		});
+
+		test("Delete an issue with an invalid _id", function (done) {
+			this.timeout(10000);
+			// Generating a random mongoose object id for an non existing issue
+			const randomObjectId = mongoose.Types.ObjectId();
+			chai
+				.request(server)
+				.delete(DELETE_TESTS_URL)
+				.send({ _id: randomObjectId })
+				.end((err, res) => {
+					// Asserting the server returns the proper JSON response
+					assert.equal(res.body.error, "could not delete");
+				});
+			done();
 		});
 	});
 });
