@@ -31,7 +31,7 @@ suite("Functional Tests", function () {
 			done();
 		});
 
-		test("Create an issue when all fields are provided", function (done) {
+		test("Create an issue with every field", function (done) {
 			// Doesn't include date properties "created_on" and "updated_on"
 			const ALL_FIELDS_EXPECTED_RESPONSE = {
 				issue_title: "A request with all fields",
@@ -97,7 +97,7 @@ suite("Functional Tests", function () {
 			done();
 		});
 
-		test("Return an error object when a required field is missing", function (done) {
+		test("Create an issue with missing required fields (return an error object when a required field is missing)", function (done) {
 			chai
 				.request(server)
 				.post(POST_TESTS_URL)
@@ -112,7 +112,7 @@ suite("Functional Tests", function () {
 				});
 		});
 
-		test("Excluded optional fields return an empty string.", function (done) {
+		test("Excluded optional fields return an empty string (create an issue with only required fields provided).", function (done) {
 			const requiredOnly = {
 				issue_title: "Fix error in posting data",
 				issue_text: "When we post data it has an error.",
@@ -239,7 +239,7 @@ suite("Functional Tests", function () {
 				});
 		});
 
-		test("Return an array of all issues for the project specified in the URL", function (done) {
+		test("View issues on a project (return an array of all issues for the project specified in the URL).", function (done) {
 			// Adding an issue for a different project, 'different_project', than the others which belong to the 'get_requests' project.
 			chai
 				.request(server)
@@ -273,7 +273,7 @@ suite("Functional Tests", function () {
 				});
 		});
 
-		test("Allow filtering the request by passing a field and value as a URL query", function (done) {
+		test("View issues on a project with one filter (using a URL query).", function (done) {
 			const URL_QUERY = {
 				open: false,
 			};
@@ -290,7 +290,8 @@ suite("Functional Tests", function () {
 				});
 		});
 
-		test("Allow filtering the request by passing multiple fields and values as a URL query", function (done) {
+		// View issues on a project with multiple filters
+		test("View issues on a project with multiple filters (using a URL query).", function (done) {
 			const URL_QUERY = {
 				created_by: ISSUE_TWO.created_by,
 				open: "true",
@@ -427,7 +428,7 @@ suite("Functional Tests", function () {
 				});
 		});
 
-		test("When no _id is provided, return { error: 'missing _id' } in JSON", function (done) {
+		test("Update an issue with missing _id", function (done) {
 			this.timeout(10000);
 			const UPDATE_ONE_FIELD_REQUEST_BODY = {
 				assigned_to: "Angélique",
@@ -442,7 +443,7 @@ suite("Functional Tests", function () {
 			done();
 		});
 
-		test("When no field to update is provided, return { error: 'no update field(s) sent', '_id': _id } in JSON", function (done) {
+		test("Update an issue with no fields to update", function (done) {
 			chai
 				.request(server)
 				.get(PUT_TESTS_URL)
@@ -460,7 +461,7 @@ suite("Functional Tests", function () {
 				});
 		});
 
-		test("On any other error, return { error: 'could not update', '_id': _id } in JSON", function (done) {
+		test("Update an issue with an invalid _id", function (done) {
 			chai
 				.request(server)
 				.put(PUT_TESTS_URL)
@@ -472,7 +473,7 @@ suite("Functional Tests", function () {
 		});
 	});
 
-	suite.only("DELETE requests to /api/issues/{project}", function () {
+	suite("DELETE requests to /api/issues/{project}", function () {
 		const DELETE_TESTS_URL = API_URL + "/delete_requests/";
 		beforeEach(function (done) {
 			chai
@@ -489,7 +490,7 @@ suite("Functional Tests", function () {
 			done();
 		});
 
-		test("Delete an issue when the _id is provided", function (done) {
+		test("Delete an issue (when the _id is provided)", function (done) {
 			// Finding the _id of the issue added in the beforeEach hook
 			chai
 				.request(server)
@@ -542,7 +543,7 @@ suite("Functional Tests", function () {
 				});
 		});
 
-		test("Return { error: 'missing _id' } when no _id is provided", function (done) {
+		test("Delete an issue with missing _id", function (done) {
 			// Sending a request with an empty body
 			chai
 				.request(server)
