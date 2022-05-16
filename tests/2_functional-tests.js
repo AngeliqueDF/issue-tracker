@@ -557,7 +557,6 @@ suite("Functional Tests", function () {
 		});
 	});
 
-	test("When the deletion fails, return { error: 'could not delete', '_id': _id }", function (done) {
 		this.timeout(10000);
 		// Generating a random mongoose object id for an non existing issue
 		const randomObjectId = mongoose.Types.ObjectId();
@@ -570,5 +569,6 @@ suite("Functional Tests", function () {
 				assert.equal(res.body.error, "could not delete");
 			});
 		done();
+		test("Delete an issue with an invalid _id", function (done) {
 	});
 });
