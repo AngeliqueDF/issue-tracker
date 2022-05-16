@@ -42,18 +42,6 @@ module.exports = function (app) {
 		.put(
 			middleware.missingId,
 			(req, res, next) => {
-				// Checks the _id is valid
-				const { _id } = req.body;
-				idIsValid = mongoose.Types.ObjectId.isValid(_id);
-
-				if (idIsValid === false) {
-					const CouldNotUpdate = new Error("could not update");
-					CouldNotUpdate.name = "CouldNotUpdate";
-					next(CouldNotUpdate);
-				}
-				next();
-			},
-			(req, res, next) => {
 				// Checks fields to update were provided
 				const fieldsProvided = Object.keys(req.body);
 				const nbFields = fieldsProvided.length;
@@ -61,7 +49,7 @@ module.exports = function (app) {
 				if (nbFields === 1 && fieldsProvided[0] === "_id") {
 					const updateFieldsMissing = new Error("no update field(s) sent");
 					updateFieldsMissing.name = "UpdateFieldsMissing";
-					updateFieldsMissing["_id"] = _id;
+					updateFieldsMissing["_id"] = req.body["_id"];
 
 					next(updateFieldsMissing);
 				}
@@ -69,7 +57,6 @@ module.exports = function (app) {
 			},
 			async (req, res, next) => {
 				// Updates the issue
-				// let project = req.params.project;
 				const { _id: filter, ...update } = req.body;
 				try {
 					const updatedIssue = await Issue.findByIdAndUpdate(
@@ -85,6 +72,10 @@ module.exports = function (app) {
 					});
 				} catch (error) {
 					console.log(error);
+					const CouldNotUpdate = new Error("could not update");
+					CouldNotUpdate.name = "CouldNotUpdate";
+					CouldNotUpdate["_id"] = filter;
+					next(CouldNotUpdate);
 				}
 			}
 		)
