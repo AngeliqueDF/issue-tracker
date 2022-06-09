@@ -182,7 +182,11 @@ suite("Functional Tests", function () {
 		});
 
 		afterEach(async function () {
-			await Issue.deleteMany({});
+			try {
+				await Issue.deleteMany({});
+			} catch (error) {
+				console.log(error);
+			}
 		});
 
 		test("Return all fields for each issue returned", function (done) {
