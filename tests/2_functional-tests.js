@@ -360,7 +360,6 @@ suite("Functional Tests", function () {
 			const UPDATE_ONE_FIELD_REQUEST_BODY = {
 				issue_title: "Issue title modified by PUT request.",
 			};
-			this.timeout(10000);
 			chai
 				.request(server)
 				.get(PUT_TESTS_URL)
