@@ -536,6 +536,7 @@ suite("Functional Tests", function () {
 			chai
 				.request(server)
 				.get(DELETE_TESTS_URL)
+				.set("Content-Type", "application/json")
 				.end((err, res) => {
 					const { _id } = res.body[0];
 
