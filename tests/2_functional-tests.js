@@ -213,13 +213,21 @@ suite("Functional Tests", function () {
 						(i) => i.issue_title === ISSUE_THREE.issue_title
 					);
 
-					// Checking all the keys are present in the issue
-					assert.hasAllKeys(returnedIssueThree, [
-						...Object.keys(ISSUE_THREE),
-						"created_on",
+					const responseKeys = [
+						"issue_title",
+						"issue_text",
+						"created_by",
+						"project",
 						"updated_on",
+						"created_on",
+						"assigned_to",
+						"status_text",
+						"open",
 						"_id",
-					]);
+					];
+
+					// Checking all the keys are present in the issue
+					assert.hasAllKeys(returnedIssueThree, responseKeys);
 
 					// Checking all the values provided in the request match in the reponse
 					assert.propertyVal(
