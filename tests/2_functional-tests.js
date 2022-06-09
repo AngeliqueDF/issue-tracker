@@ -26,6 +26,12 @@ suite("Functional Tests", function () {
 		const POST_PROJECT = "post_requests";
 		const POST_TESTS_URL = API_URL + "/" + POST_PROJECT;
 
+		afterEach(async function () {
+			try {
+				await Issue.deleteMany({});
+			} catch (error) {
+				console.log(error);
+			}
 		});
 
 		test("Create an issue with every field", function (done) {
