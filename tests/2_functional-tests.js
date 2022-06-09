@@ -523,9 +523,12 @@ suite("Functional Tests", function () {
 			}
 		});
 
-		afterEach(function (done) {
-			issue.deleteMany({});
-			done();
+		afterEach(async function () {
+			try {
+				await Issue.deleteMany({});
+			} catch (error) {
+				console.log(error);
+			}
 		});
 
 		test("Delete an issue (when the _id is provided)", function (done) {
