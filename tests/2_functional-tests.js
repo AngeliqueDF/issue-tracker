@@ -502,15 +502,25 @@ suite("Functional Tests", function () {
 	});
 
 	suite("DELETE requests to /api/issues/{project}", function () {
-		const DELETE_TESTS_URL = API_URL + "/delete_requests/";
-		beforeEach(function (done) {
-			chai
-				.request(server)
-				.post(DELETE_TESTS_URL)
-				.send(ALL_FIELDS_POST_REQUEST)
-				.end((err, res) => {
-					done();
+		const DELETE_TESTS_PROJECT = "delete_requests";
+		const DELETE_TESTS_URL = API_URL + "/" + DELETE_TESTS_PROJECT;
+		beforeEach(async function () {
+			try {
+				const newIssue = await Issue({
+					issue_title: "Issue to delete title",
+					issue_text: "Issue to delete  text",
+					created_by: "author 1",
+					project: DELETE_TESTS_PROJECT,
+					updated_on: new Date(),
+					created_on: new Date(),
+					assigned_to: "User 1",
+					status_text: "status text",
+					open: true,
 				});
+				await newIssue.save();
+			} catch (error) {
+				console.log(error);
+			}
 		});
 
 		afterEach(function (done) {
