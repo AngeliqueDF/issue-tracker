@@ -323,10 +323,9 @@ suite("Functional Tests", function () {
 				.get(GET_TESTS_URL)
 				.query(URL_QUERY)
 				.end(function (err, res) {
-					assert.include(res.body[0], {
-						...ISSUE_TWO,
-						open: JSON.parse(URL_QUERY.open),
-					});
+					const storedIssue = res.body[0];
+					assert.equal(storedIssue.created_by, URL_QUERY.created_by);
+					assert.equal(storedIssue.open, JSON.parse(URL_QUERY.open));
 					done();
 				});
 		});
