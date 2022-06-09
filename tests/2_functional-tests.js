@@ -594,18 +594,21 @@ suite("Functional Tests", function () {
 				});
 		});
 
-		this.timeout(10000);
-		// Generating a random mongoose object id for an non existing issue
-		const randomObjectId = mongoose.Types.ObjectId();
-		chai
-			.request(server)
-			.delete(DELETE_TESTS_URL)
-			.send({ _id: randomObjectId })
-			.end((err, res) => {
-				// Asserting the server returns the proper JSON response
-				assert.equal(res.body.error, "could not delete");
-			});
-		done();
 		test("Delete an issue with an invalid _id", function (done) {
+			// Generating a random mongoose object id for an non existing issue
+			const randomObjectId = mongoose.Types.ObjectId();
+			chai
+				.request(server)
+				.delete(DELETE_TESTS_URL)
+				.send({ _id: randomObjectId })
+				.end(async (err, res) => {
+					const nonExistentIssue = await Issue.findById(randomObjectId);
+					if (!nonExistentIssue) {
+						// Asserting the server returns the proper JSON response
+						assert.equal(res.body.error, "could not delete");
+						done();
+					}
+				});
+		});
 	});
 });
