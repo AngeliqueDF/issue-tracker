@@ -306,10 +306,8 @@ suite("Functional Tests", function () {
 				.get(GET_TESTS_URL)
 				.query(URL_QUERY)
 				.end(function (err, res) {
-					assert.include(res.body[0], {
-						...ISSUE_THREE,
-						open: JSON.parse(ISSUE_THREE.open),
-					});
+					assert.equal(res.body[0].issue_title, ISSUE_THREE.issue_title);
+					assert.equal(res.body[0].open, URL_QUERY.open);
 					done();
 				});
 		});
