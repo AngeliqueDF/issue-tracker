@@ -9,7 +9,6 @@ const helper = require("./../utils/helper");
 
 const mongoose = require("mongoose");
 const Issue = require("./../models/issue");
-const issue = require("./../models/issue");
 
 suite("Functional Tests", function () {
 	const API_URL = "/api/issues";
