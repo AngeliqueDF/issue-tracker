@@ -545,20 +545,16 @@ suite("Functional Tests", function () {
 						.request(server)
 						.delete(DELETE_TESTS_URL)
 						.send({ _id })
-						.end((err, res) => {
-							// Requesting all issues belonging to the delete_requests project
-							chai
-								.request(server)
-								.get(DELETE_TESTS_URL)
-								.end((err, res) => {
-									const deletedIssue = res.body.find((i) => i["_id"] === _id);
-
-									// Asserting the issue was deleted
-									assert.isUndefined(deletedIssue);
-									assert.lengthOf(res.body, 0);
-
-									done();
-								});
+						.end(async (err, res) => {
+							try {
+								const deletedIssue = await Issue.findById(_id);
+								assert.equal(deletedIssue, undefined);
+								assert.equal(res.body.result, "successfully deleted");
+								assert.equal(res.body._id, _id);
+								done();
+							} catch (error) {
+								console.log(error);
+							}
 						});
 				});
 		});
@@ -597,7 +593,6 @@ suite("Functional Tests", function () {
 					done();
 				});
 		});
-	});
 
 		this.timeout(10000);
 		// Generating a random mongoose object id for an non existing issue
