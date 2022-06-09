@@ -26,12 +26,16 @@ suite("Functional Tests", function () {
 		const POST_PROJECT = "post_requests";
 		const POST_TESTS_URL = API_URL + "/" + POST_PROJECT;
 
-		this.beforeEach((done) => {
-			this.timeout(10000);
-			done();
 		});
 
 		test("Create an issue with every field", function (done) {
+			before(async function () {
+				try {
+					await Issue.deleteMany({});
+				} catch (error) {
+					console.log(error);
+				}
+			});
 			// Doesn't include date properties "created_on" and "updated_on"
 			const ALL_FIELDS_EXPECTED_RESPONSE = {
 				issue_title: "A request with all fields",
