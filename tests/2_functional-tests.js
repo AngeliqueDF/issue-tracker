@@ -276,8 +276,6 @@ suite("Functional Tests", function () {
 					created_by: "Different project issue author",
 				})
 				.end(function (err, res) {
-					// console.log("Test issue added for different_project", res.body);
-
 					// Requesting all issues for 'different_project'
 					chai
 						.request(server)
