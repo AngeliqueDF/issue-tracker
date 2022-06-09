@@ -390,7 +390,6 @@ suite("Functional Tests", function () {
 		});
 
 		test("Update multiple fields on an issue", function (done) {
-			this.timeout(10000);
 			const UPDATE_MULTIPLE_FIELDS_REQUEST_BODY = {
 				issue_title: "Issue title modified by PUT request.",
 				issue_text: "Issue text modified by PUT request.",
@@ -408,26 +407,27 @@ suite("Functional Tests", function () {
 						.request(server)
 						.put(PUT_TESTS_URL)
 						.send({ ...UPDATE_MULTIPLE_FIELDS_REQUEST_BODY, _id })
-						.end((err, res) => {
+						.end(async (err, res) => {
 							// Find the updated issue
-							chai
-								.request(server)
-								.get(PUT_TESTS_URL)
-								.end(function (err, res) {
-									// Check all fields updated have the correct value
-									assert.equal(
-										res.body[0].issue_title,
-										UPDATE_MULTIPLE_FIELDS_REQUEST_BODY.issue_title
-									);
-									assert.equal(
-										res.body[0].issue_text,
-										UPDATE_MULTIPLE_FIELDS_REQUEST_BODY.issue_text
-									);
-									assert.equal(
-										res.body[0].assigned_to,
-										UPDATE_MULTIPLE_FIELDS_REQUEST_BODY.assigned_to
-									);
-								});
+							const { _id } = res.body;
+							try {
+								const updatedIssue = await Issue.findById(_id);
+								// Check all fields updated have the correct value
+								assert.equal(
+									updatedIssue.issue_title,
+									UPDATE_MULTIPLE_FIELDS_REQUEST_BODY.issue_title
+								);
+								assert.equal(
+									updatedIssue.issue_text,
+									UPDATE_MULTIPLE_FIELDS_REQUEST_BODY.issue_text
+								);
+								assert.equal(
+									updatedIssue.assigned_to,
+									UPDATE_MULTIPLE_FIELDS_REQUEST_BODY.assigned_to
+								);
+							} catch (error) {
+								console.log(error);
+							}
 						});
 					done();
 				});
