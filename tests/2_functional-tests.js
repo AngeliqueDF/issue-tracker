@@ -333,20 +333,27 @@ suite("Functional Tests", function () {
 
 	suite('PUT requests to "/api/issues/{project}"', function () {
 		const PUT_TESTS_URL = API_URL + "/put_requests/";
-		beforeEach(function (done) {
-			chai
-				.request(server)
-				.post(PUT_TESTS_URL)
-				.send(ALL_FIELDS_POST_REQUEST)
-				.end((err, res) => {
-					// console.log("test issue added", res.body);
-					this.timeout(10000);
-					done();
+		beforeEach(async function () {
+			try {
+				const newIssue = new Issue({
+					...ALL_FIELDS_POST_REQUEST,
+					project: "put_requests",
+					updated_on: new Date(),
+					created_on: new Date(),
+					open: false,
 				});
+				await newIssue.save();
+			} catch (error) {
+				console.log(error);
+			}
 		});
 
-		afterEach(function () {
-			Issue.deleteMany({});
+		afterEach(async function () {
+			try {
+				await Issue.deleteMany({});
+			} catch (error) {
+				console.log(error);
+			}
 		});
 
 		test("Update one field on an issue", function (done) {
