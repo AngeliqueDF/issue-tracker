@@ -367,23 +367,24 @@ suite("Functional Tests", function () {
 				.end((err, res) => {
 					// Find the issue to update
 					const { _id } = res.body[0];
-
+					// Update the issue
 					chai
 						.request(server)
 						.put(PUT_TESTS_URL)
 						.send({ ...UPDATE_ONE_FIELD_REQUEST_BODY, _id })
-						.end((err, res) => {
-							// Update the issue
-							chai
-								.request(server)
-								.get(PUT_TESTS_URL)
-								.end(function (err, res) {
-									// Assert it was updated
-									assert.equal(
-										res.body[0].issue_title,
-										UPDATE_ONE_FIELD_REQUEST_BODY.issue_title
-									);
-								});
+						.end(async (err, res) => {
+							try {
+								const updatedIssue = await Issue.findById(_id);
+								console.log(updatedIssue);
+								assert.equal(res.body.result, "successfully updated");
+								assert.equal(res.body._id, _id);
+								assert.equal(
+									updatedIssue.issue_title,
+									UPDATE_ONE_FIELD_REQUEST_BODY.issue_title
+								);
+							} catch (error) {
+								console.log(error);
+							}
 						});
 					done();
 				});
