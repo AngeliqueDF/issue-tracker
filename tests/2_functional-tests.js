@@ -173,21 +173,12 @@ suite("Functional Tests", function () {
 			open: "false",
 		};
 
-		beforeEach(function (done) {
-			this.timeout(10000);
-			[ISSUE_ONE, ISSUE_TWO, ISSUE_THREE].forEach(async (issue) => {
-				chai
-					.request(server)
-					.post(GET_TESTS_URL)
-					.set("Content-Type", "application/json")
-					.send(issue)
-					.end(function (err, res) {
-						// console.log(res.status);
-						// console.log("request body:", res.body);
-						// console.log("error:", err);
-					});
-			});
-			done();
+		beforeEach(async function () {
+			try {
+				await Issue.insertMany([ISSUE_ONE, ISSUE_TWO, ISSUE_THREE]);
+			} catch (error) {
+				console.log(error);
+			}
 		});
 
 		afterEach(async function () {
