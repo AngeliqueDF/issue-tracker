@@ -457,7 +457,6 @@ suite("Functional Tests", function () {
 		});
 
 		test("Update an issue with missing _id", function (done) {
-			this.timeout(10000);
 			const UPDATE_ONE_FIELD_REQUEST_BODY = {
 				assigned_to: "Angélique",
 			};
@@ -566,7 +565,6 @@ suite("Functional Tests", function () {
 				.get(DELETE_TESTS_URL)
 				.end((err, res) => {
 					const { _id } = res.body[0];
-
 					// Sending the DELETE request
 					chai
 						.request(server)
