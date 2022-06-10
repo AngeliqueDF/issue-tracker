@@ -1,7 +1,5 @@
 "use strict";
-const { findOneAndUpdate } = require("./../models/issue");
 const Issue = require("./../models/issue");
-const mongoose = require("mongoose");
 const middleware = require("./../utils/middleware");
 
 module.exports = function (app) {
