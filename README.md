@@ -55,7 +55,7 @@ I added minimal security measures with `helmet`, `mongoose` validation, and a sa
 
 ## Status
 
-**The code meets the challenge requirements but needs security improvements**. I also plan on adding a frontend with routing.
+**The code meets the challenge requirements but needs security improvements**. I also plan on adding a custom frontend with routing.
 
 ### Planned changes
 
