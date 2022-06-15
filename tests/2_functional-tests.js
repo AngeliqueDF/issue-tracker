@@ -7,7 +7,9 @@ chai.use(chaiHttp);
 
 const helper = require("./../utils/helper");
 
+const mongoose = require("mongoose");
 const Issue = require("./../models/issue");
+const { beforeEach, afterEach, before } = require("mocha");
 
 suite("Functional Tests", function () {
 	const API_URL = "/api/issues";
@@ -24,12 +26,22 @@ suite("Functional Tests", function () {
 		const POST_PROJECT = "post_requests";
 		const POST_TESTS_URL = API_URL + "/" + POST_PROJECT;
 
-		this.beforeEach((done) => {
-			this.timeout(10000);
-			done();
+		afterEach(async function () {
+			try {
+				await Issue.deleteMany({});
+			} catch (error) {
+				console.log(error);
+			}
 		});
 
 		test("Create an issue with every field", function (done) {
+			before(async function () {
+				try {
+					await Issue.deleteMany({});
+				} catch (error) {
+					console.log(error);
+				}
+			});
 			// Doesn't include date properties "created_on" and "updated_on"
 			const ALL_FIELDS_EXPECTED_RESPONSE = {
 				issue_title: "A request with all fields",
@@ -144,38 +156,50 @@ suite("Functional Tests", function () {
 			issue_title: "Issue 1 title",
 			issue_text: "Issue 1 text",
 			created_by: "author 1",
+			project: GET_PROJECT_ONE,
+			updated_on: new Date(),
+			created_on: new Date(),
+			assigned_to: "User 1",
+			status_text: "status text",
+			open: true,
 		};
 		const ISSUE_TWO = {
 			issue_title: "Issue 2 title",
 			issue_text: "Issue 2 text",
 			created_by: "author 2",
+			project: GET_PROJECT_ONE,
+			updated_on: new Date(),
+			created_on: new Date(),
 			assigned_to: "User 1",
 			status_text: "status text",
+			open: true,
 		};
 		const ISSUE_THREE = {
 			issue_title: "Issue 3 title",
 			issue_text: "Issue 3 text",
 			created_by: "author 3",
+			project: GET_PROJECT_ONE,
+			updated_on: new Date(),
+			created_on: new Date(),
 			assigned_to: "User 1",
 			status_text: "status text",
 			open: "false",
 		};
 
-		beforeEach(function (done) {
-			this.timeout(10000);
-			[ISSUE_ONE, ISSUE_TWO, ISSUE_THREE].forEach(async (issue) => {
-				chai
-					.request(server)
-					.post(GET_TESTS_URL)
-					.set("Content-Type", "application/json")
-					.send(issue)
-					.end(function (err, res) {});
-			});
-			done();
+		beforeEach(async function () {
+			try {
+				await Issue.insertMany([ISSUE_ONE, ISSUE_TWO, ISSUE_THREE]);
+			} catch (error) {
+				console.log(error);
+			}
 		});
 
 		afterEach(async function () {
-			await Issue.deleteMany({});
+			try {
+				await Issue.deleteMany({});
+			} catch (error) {
+				console.log(error);
+			}
 		});
 
 		test("Return all fields for each issue returned", function (done) {
@@ -189,13 +213,21 @@ suite("Functional Tests", function () {
 						(i) => i.issue_title === ISSUE_THREE.issue_title
 					);
 
-					// Checking all the keys are present in the issue
-					assert.hasAllKeys(returnedIssueThree, [
-						...Object.keys(ISSUE_THREE),
-						"created_on",
+					const responseKeys = [
+						"issue_title",
+						"issue_text",
+						"created_by",
+						"project",
 						"updated_on",
+						"created_on",
+						"assigned_to",
+						"status_text",
+						"open",
 						"_id",
-					]);
+					];
+
+					// Checking all the keys are present in the issue
+					assert.hasAllKeys(returnedIssueThree, responseKeys);
 
 					// Checking all the values provided in the request match in the reponse
 					assert.propertyVal(
@@ -244,8 +276,6 @@ suite("Functional Tests", function () {
 					created_by: "Different project issue author",
 				})
 				.end(function (err, res) {
-					// console.log("Test issue added for different_project", res.body);
-
 					// Requesting all issues for 'different_project'
 					chai
 						.request(server)
@@ -276,10 +306,8 @@ suite("Functional Tests", function () {
 				.get(GET_TESTS_URL)
 				.query(URL_QUERY)
 				.end(function (err, res) {
-					assert.include(res.body[0], {
-						...ISSUE_THREE,
-						open: JSON.parse(ISSUE_THREE.open),
-					});
+					assert.equal(res.body[0].issue_title, ISSUE_THREE.issue_title);
+					assert.equal(res.body[0].open, URL_QUERY.open);
 					done();
 				});
 		});
@@ -295,11 +323,289 @@ suite("Functional Tests", function () {
 				.get(GET_TESTS_URL)
 				.query(URL_QUERY)
 				.end(function (err, res) {
-					assert.include(res.body[0], {
-						...ISSUE_TWO,
-						open: JSON.parse(URL_QUERY.open),
-					});
+					const storedIssue = res.body[0];
+					assert.equal(storedIssue.created_by, URL_QUERY.created_by);
+					assert.equal(storedIssue.open, JSON.parse(URL_QUERY.open));
 					done();
+				});
+		});
+	});
+
+	suite('PUT requests to "/api/issues/{project}"', function () {
+		const PUT_TESTS_URL = API_URL + "/put_requests/";
+		beforeEach(async function () {
+			try {
+				const newIssue = new Issue({
+					...ALL_FIELDS_POST_REQUEST,
+					project: "put_requests",
+					updated_on: new Date(),
+					created_on: new Date(),
+					open: false,
+				});
+				await newIssue.save();
+			} catch (error) {
+				console.log(error);
+			}
+		});
+
+		afterEach(async function () {
+			try {
+				await Issue.deleteMany({});
+			} catch (error) {
+				console.log(error);
+			}
+		});
+
+		test("Update one field on an issue", function (done) {
+			const UPDATE_ONE_FIELD_REQUEST_BODY = {
+				issue_title: "Issue title modified by PUT request.",
+			};
+			chai
+				.request(server)
+				.get(PUT_TESTS_URL)
+				.end((err, res) => {
+					// Find the issue to update
+					const { _id } = res.body[0];
+					// Update the issue
+					chai
+						.request(server)
+						.put(PUT_TESTS_URL)
+						.send({ ...UPDATE_ONE_FIELD_REQUEST_BODY, _id })
+						.end(async (err, res) => {
+							try {
+								const updatedIssue = await Issue.findById(_id);
+								console.log(updatedIssue);
+								assert.equal(res.body.result, "successfully updated");
+								assert.equal(res.body._id, _id);
+								assert.equal(
+									updatedIssue.issue_title,
+									UPDATE_ONE_FIELD_REQUEST_BODY.issue_title
+								);
+							} catch (error) {
+								console.log(error);
+							}
+						});
+					done();
+				});
+		});
+
+		test("Update multiple fields on an issue", function (done) {
+			const UPDATE_MULTIPLE_FIELDS_REQUEST_BODY = {
+				issue_title: "Issue title modified by PUT request.",
+				issue_text: "Issue text modified by PUT request.",
+				assigned_to: "Angélique",
+			};
+			chai
+				.request(server)
+				.get(PUT_TESTS_URL)
+				.end((err, res) => {
+					// Find the issue's _id to update it
+					const { _id } = res.body[0];
+
+					// Update the issue
+					chai
+						.request(server)
+						.put(PUT_TESTS_URL)
+						.send({ ...UPDATE_MULTIPLE_FIELDS_REQUEST_BODY, _id })
+						.end(async (err, res) => {
+							// Find the updated issue
+							const { _id } = res.body;
+							try {
+								const updatedIssue = await Issue.findById(_id);
+								// Check all fields updated have the correct value
+								assert.equal(
+									updatedIssue.issue_title,
+									UPDATE_MULTIPLE_FIELDS_REQUEST_BODY.issue_title
+								);
+								assert.equal(
+									updatedIssue.issue_text,
+									UPDATE_MULTIPLE_FIELDS_REQUEST_BODY.issue_text
+								);
+								assert.equal(
+									updatedIssue.assigned_to,
+									UPDATE_MULTIPLE_FIELDS_REQUEST_BODY.assigned_to
+								);
+							} catch (error) {
+								console.log(error);
+							}
+						});
+					done();
+				});
+		});
+
+		test("On success, return {  result: 'successfully updated', '_id': _id } in JSON", function (done) {
+			const UPDATE_ONE_FIELD_REQUEST_BODY = {
+				assigned_to: "Angélique",
+			};
+			chai
+				.request(server)
+				.get(PUT_TESTS_URL)
+				.end((err, res) => {
+					const { _id } = res.body[0];
+
+					chai
+						.request(server)
+						.put(PUT_TESTS_URL)
+						.send({ ...UPDATE_ONE_FIELD_REQUEST_BODY, _id })
+						.end((err, res) => {
+							// The _id is changed by the server, but we can validate the new one
+							assert.isTrue(mongoose.Types.ObjectId.isValid(res.body["_id"]));
+							assert.equal(res.body.result, "successfully updated");
+						});
+					done();
+				});
+		});
+
+		test("Update an issue with missing _id", function (done) {
+			const UPDATE_ONE_FIELD_REQUEST_BODY = {
+				assigned_to: "Angélique",
+			};
+			chai
+				.request(server)
+				.put(PUT_TESTS_URL)
+				.send({ UPDATE_ONE_FIELD_REQUEST_BODY })
+				.end((err, res) => {
+					assert.equal(res.body.error, "missing _id");
+				});
+			done();
+		});
+
+		test("Update an issue with no fields to update", function (done) {
+			chai
+				.request(server)
+				.get(PUT_TESTS_URL)
+				.end((err, res) => {
+					const { _id } = res.body[0];
+
+					chai
+						.request(server)
+						.put(PUT_TESTS_URL)
+						.send({ _id })
+						.end((err, res) => {
+							assert.equal(res.body.error, "no update field(s) sent");
+						});
+					done();
+				});
+		});
+
+		test("Update an issue with an invalid _id", function (done) {
+			chai
+				.request(server)
+				.put(PUT_TESTS_URL)
+				.send({ _id: "invalid id", issue_title: "issue title" })
+				.end((err, res) => {
+					assert.equal(res.body.error, "could not update");
+				});
+			done();
+		});
+	});
+
+	suite("DELETE requests to /api/issues/{project}", function () {
+		const DELETE_TESTS_PROJECT = "delete_requests";
+		const DELETE_TESTS_URL = API_URL + "/" + DELETE_TESTS_PROJECT;
+		beforeEach(async function () {
+			try {
+				const newIssue = await Issue({
+					issue_title: "Issue to delete title",
+					issue_text: "Issue to delete  text",
+					created_by: "author 1",
+					project: DELETE_TESTS_PROJECT,
+					updated_on: new Date(),
+					created_on: new Date(),
+					assigned_to: "User 1",
+					status_text: "status text",
+					open: true,
+				});
+				await newIssue.save();
+			} catch (error) {
+				console.log(error);
+			}
+		});
+
+		afterEach(async function () {
+			try {
+				await Issue.deleteMany({});
+			} catch (error) {
+				console.log(error);
+			}
+		});
+
+		test("Delete an issue (when the _id is provided)", function (done) {
+			// Finding the _id of the issue added in the beforeEach hook
+			chai
+				.request(server)
+				.get(DELETE_TESTS_URL)
+				.set("Content-Type", "application/json")
+				.end((err, res) => {
+					const { _id } = res.body[0];
+
+					// Sending the DELETE request
+					chai
+						.request(server)
+						.delete(DELETE_TESTS_URL)
+						.send({ _id })
+						.end(async (err, res) => {
+							try {
+								const deletedIssue = await Issue.findById(_id);
+								assert.equal(deletedIssue, undefined);
+								assert.equal(res.body.result, "successfully deleted");
+								assert.equal(res.body._id, _id);
+								done();
+							} catch (error) {
+								console.log(error);
+							}
+						});
+				});
+		});
+
+		test("When the issue is successfully deleted, return{ result: 'successfully deleted', '_id': _id }", function (done) {
+			// Finding the _id of the issue added in the beforeEach hook
+			chai
+				.request(server)
+				.get(DELETE_TESTS_URL)
+				.end((err, res) => {
+					const { _id } = res.body[0];
+					// Sending the DELETE request
+					chai
+						.request(server)
+						.delete(DELETE_TESTS_URL)
+						.send({ _id })
+						.end((err, res) => {
+							// Asserting the server returns the proper JSON response
+							assert.equal(res.body.result, "successfully deleted");
+							assert.equal(res.body["_id"], _id);
+							done();
+						});
+				});
+		});
+
+		test("Delete an issue with missing _id", function (done) {
+			// Sending a request with an empty body
+			chai
+				.request(server)
+				.delete(DELETE_TESTS_URL)
+				.send({})
+				.end((err, res) => {
+					// Asserting the server returns the proper JSON response
+					assert.equal(res.body.error, "missing _id");
+					done();
+				});
+		});
+
+		test("Delete an issue with an invalid _id", function (done) {
+			// Generating a random mongoose object id for an non existing issue
+			const randomObjectId = mongoose.Types.ObjectId();
+			chai
+				.request(server)
+				.delete(DELETE_TESTS_URL)
+				.send({ _id: randomObjectId })
+				.end(async (err, res) => {
+					const nonExistentIssue = await Issue.findById(randomObjectId);
+					if (!nonExistentIssue) {
+						// Asserting the server returns the proper JSON response
+						assert.equal(res.body.error, "could not delete");
+						done();
+					}
 				});
 		});
 	});
